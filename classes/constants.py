@@ -11,6 +11,8 @@ claims_train_set_path = "data/train.jsonl"
 claims_validation_set_path = "data/shared_task_dev.jsonl"
 claims_test_set_path = "data/shared_task_test.jsonl"
 
-
+claims_pickle_train_set_path = "data/train.pkl"
+claims_pickle_validation_set_path = "data/shared_task_dev.pkl"
+claims_pickle_test_set_path = "data/shared_task_test.pkl"
 
 
