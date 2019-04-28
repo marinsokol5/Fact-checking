@@ -8,6 +8,15 @@ from util.general_util import normalize_nfd
 
 
 class WikiArticle:
+    _bracket_replacements = {
+        "-LRB-": "(",
+        "-LSB-": "[",
+        "-LCB-": "{",
+        "-RCB-": "}",
+        "-RRB-": ")",
+        "-RSB-": "]",
+    }
+
     """
     It's the hyperlinks in the Wikipedia page.
     Listed in pairs, the first entry is the surface form in the sentence,
@@ -80,5 +89,6 @@ class WikiArticle:
 
     @staticmethod
     def _decode_bracket_tokens(text: str) -> str:
-        return text.replace("-LRB-", "(").replace("-RRB-", ")")
-
+        for k, v in WikiArticle._bracket_replacements.items():
+            text = text.replace(k, v)
+        return text

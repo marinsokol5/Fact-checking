@@ -1,4 +1,5 @@
 # Imports from external libraries
+from typing import List
 
 # Imports from internal libraries
 from util.general_util import normalize_nfd
@@ -31,6 +32,12 @@ class Claim:
         for doc_set in self.evidence:
             documents.update({doc[0] for doc in doc_set})
         return documents
+
+    def evidence_document_sets(self) -> List[set]:
+        document_sets = []
+        for doc_set in self.evidence:
+            document_sets.append({doc[0] for doc in doc_set})
+        return document_sets
 
     @staticmethod
     def from_json(json_dump, decode_brackets=True):

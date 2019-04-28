@@ -43,5 +43,19 @@ def find_wiki_article(article_id: str, dictionary_path=article_id_to_pickle_dict
             return w
 
 
+def load_wikipedia_ids() -> set:
+    return pickle_load(article_id_to_pickle_dictionary_path).keys()
+
+
+def load_wikipedia_titles() -> set:
+    return convert_wikipedia_ids_to_titles(load_wikipedia_ids())
+
+
+def convert_wikipedia_ids_to_titles(wikipedia_ids) -> set:
+    return {w.replace("_", " ") for w in wikipedia_ids}
+
+
+def convert_wikipedia_titles_to_ids(wikipedia_titles) -> set:
+    return {w.replace(" ", "_") for w in wikipedia_titles}
 
 
