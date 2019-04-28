@@ -16,7 +16,7 @@ class WikiArticle:
 
     In field lines for a wiki article not all lines start with numbers.
     We have found some lines that end with \t and then in the next line
-    they are hyperlinks continued 
+    they are hyperlinks continued
     """
 
     def __init__(self, id: str, text: str, lines: str, decode_brackets=True):
