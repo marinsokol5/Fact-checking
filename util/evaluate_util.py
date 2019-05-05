@@ -30,8 +30,10 @@ def evaluate_documents_retrieval(actual_documents_set: List[set], predicted_docu
     }
 
 
-def evaluate_documents_retrieval_full(actual_documents_sets: List[List[set]], predicted_documents_set: List[set]):
+def evaluate_documents_retrieval_full(actual_documents_sets: List[List[set]], predicted_documents_set: List[set], verbose=True):
     average_precision, average_recall, average_f1, average_f2, counter, oracle_accuracy = 0, 0, 0, 0, 0, 0
+    if verbose:
+        document_results = []
     for actual_documents, predicted_documents in zip(actual_documents_sets, predicted_documents_set):
         evaluation = evaluate_document_retrieval_full(actual_documents, predicted_documents)
         average_precision += evaluation['precision']
@@ -41,13 +43,20 @@ def evaluate_documents_retrieval_full(actual_documents_sets: List[List[set]], pr
         counter += 1
         oracle_accuracy += evaluation['oracle_accuracy']
 
-    return {
+        if verbose:
+            document_results.append(evaluation)
+
+    result = {
         'average_precision': average_precision / counter,
         'average_recall': average_recall / counter,
         'average_f1_score': average_f1 / counter,
         'average_f2_score': average_f2 / counter,
         'oracle_accuracy': oracle_accuracy / counter,
     }
+
+    if verbose:
+        return result, document_results
+    return result
 
 
 def evaluate_document_retrieval(actual_documents: set, predicted_documents: set):
