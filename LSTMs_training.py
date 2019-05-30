@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-# In[2]:
 
 
 from dataset.google_dataset import *
@@ -11,13 +5,14 @@ import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm, trange
 import copy
-from util.modelling_util import save_model, load_bert_model, logits_to_percentages, freeze_only_first_n_layers, get_trainable_parameters, get_best_possible_threshold
+from util.modelling_util import save_model, logits_to_percentages, freeze_only_first_n_layers, get_trainable_parameters, get_best_possible_threshold
 import numpy as np
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score, balanced_accuracy_score, confusion_matrix, classification_report
 import json
 import visdom
 from torch.optim import Adam
 import torch.nn as nn
+import torch.nn.functional as F
 
 from models.LSTMs import LSTMs
 
@@ -105,6 +100,9 @@ def train(original_model, train_data, validation_data, max_epochs=100, early_sto
     # for epoch_index in trange(max_epochs, desc="Epoch"):
     for epoch_index in range(max_epochs):
         model.train()
+
+        dataloader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=4,
+                                collate_fn=GoogleDatasetGlove.collate)
         # for batch in tqdm(dataloader, desc="Iteration"):
         for batch in dataloader:
             batch = tuple(t.to(device) for t in batch)
@@ -113,7 +111,7 @@ def train(original_model, train_data, validation_data, max_epochs=100, early_sto
             optimizer.zero_grad()
 
             logits = model((claim_batch, google_result_batch))
-            batch_loss = criterion(logits, label_batch)
+            batch_loss = criterion(logits.squeeze(), label_batch)
 
             batch_loss.backward()
             optimizer.step()
@@ -162,27 +160,30 @@ def evaluate(model, evaluation_data, result_file_name=None, find_best_threshold=
     predicted_classes = np.array([], dtype=np.int)
     predicted_probabilities = np.array([], dtype=np.float)
     loss_sum, loss_size = 0, 0
-    
-    for batch in tqdm(dataloader, desc="Evaluating"):
+
+    dataloader = DataLoader(evaluation_data, batch_size=batch_size, shuffle=True, num_workers=4,
+                            collate_fn=GoogleDatasetGlove.collate)
+
+    # for batch in tqdm(dataloader, desc="Evaluating"):
+    for batch in dataloader:
         batch = tuple(t.to(device) for t in batch)
         claim_batch, google_result_batch, label_batch = batch
 
         with torch.no_grad():
             logits = model((claim_batch, google_result_batch))
+            logits = logits.squeeze()
             batch_loss = criterion(logits, label_batch)
 
-        logits = logits.detach().cpu()
-        percentages = logits_to_percentages(logits).numpy()
-        batch_predicted_classes = np.argmax(percentages, axis=1)
-        batch_predicted_probabilities = percentages[:,1]
-        label_batch = label_batch.cpu().numpy()
-        
-        actual_classes = np.concatenate([actual_classes, label_batch], axis=0)
-        predicted_classes = np.concatenate([predicted_classes, batch_predicted_classes], axis=0)
-        predicted_probabilities = np.concatenate([predicted_probabilities, batch_predicted_probabilities], axis=0)
-        
-        loss_sum += batch_loss.item()
-        loss_size += 1
+            percentages = F.softmax(logits, dim=1).cpu().numpy()
+            batch_predicted_classes = np.argmax(percentages, axis=1)
+            batch_predicted_probabilities = percentages[:, 1]
+
+            actual_classes = np.concatenate([actual_classes, label_batch.cpu().numpy()], axis=0)
+            predicted_classes = np.concatenate([predicted_classes, batch_predicted_classes], axis=0)
+            predicted_probabilities = np.concatenate([predicted_probabilities, batch_predicted_probabilities], axis=0)
+
+            loss_sum += batch_loss.item()
+            loss_size += 1
 
     report = classification_report(actual_classes, predicted_classes, output_dict=True)
     if find_best_threshold:
@@ -214,18 +215,20 @@ if __name__ == '__main__':
     validation_data = GoogleDatasetGlove.from_pickle(GoogleDataset.VALIDATION_DATA, glove_file)
     test_data = GoogleDatasetGlove.from_pickle(GoogleDataset.TEST_DATA, glove_file)
 
-    visdom_vision = visdom.Visdom()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+    visdom_vision = visdom.Visdom()
 
     batch_size = 16
     lstms_model = LSTMs(
         emb_dim=train_data.embedding_size(),
         hidden_dim=250,
         num_layers=1,
-        batch_size=batch_size
+        batch_size=batch_size,
+        device=device
     )
     # num_train_optimization_steps = int(len(train_data) / batch_size) * max_epochs
-    dataloader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=4, collate_fn=GoogleDatasetGlove.collate)
+
     optimizer = Adam(lstms_model.parameters(), lr=0.001)
     criterion = nn.CrossEntropyLoss()
 
@@ -234,8 +237,6 @@ if __name__ == '__main__':
     save_every_n = 4
 
     learning_rate = 5e-5
-
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     model_name = "lstms_1"
     lstms_trained = train(lstms_model, train_data, validation_data, max_epochs, early_stop_epochs, save_every_n, model_name, visdom_vision, visdom_plot_title=f"{model_name}")
