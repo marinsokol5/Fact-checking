@@ -8,11 +8,8 @@
 
 from dataset.google_dataset import *
 import torch
-from pytorch_pretrained_bert import BertTokenizer, BertModel, BertForMaskedLM, BertForSequenceClassification
-from pytorch_pretrained_bert.optimization import BertAdam, warmup_linear
 from torch.utils.data import DataLoader
 from tqdm import tqdm, trange
-from pytorch_pretrained_bert.modeling import BertConfig
 import copy
 from util.modelling_util import save_model, load_bert_model, logits_to_percentages, freeze_only_first_n_layers, get_trainable_parameters, get_best_possible_threshold
 import numpy as np
@@ -265,7 +262,7 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     model_name = "lstms_1"
-    lstms_trained = train(lstms_model, train_data, validation_data, batch_size, batch_size, max_epochs, early_stop_epochs, save_every_n, model_name, visdom_vision, visdom_plot_title=f"{model_name}")
+    lstms_trained = train(lstms_model, train_data, validation_data, max_epochs, early_stop_epochs, save_every_n, model_name, visdom_vision, visdom_plot_title=f"{model_name}")
     evaluate(lstms_trained, test_data, batch_size, f"{model_name}_results")
     save_model(lstms_model, f"{model_name}")
 

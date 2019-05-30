@@ -154,7 +154,7 @@ class GoogleDatasetGlove(GoogleDataset):
         return np.array([self.glove(t) for t in tokens if self.glove_contains_word(t)])
 
     def embedding_size(self):
-        return self.glove_matrix[1]
+        return self.glove_matrix.shape[1]
 
     def __getitem__(self, index):
         claim: str = self.data[index][0]
