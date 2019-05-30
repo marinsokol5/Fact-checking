@@ -8,6 +8,7 @@ from typing import List
 import pandas as pd
 import csv
 import numpy as np
+from nltk import word_tokenize
 
 # Imports from internal libraries
 
@@ -142,10 +143,15 @@ class GoogleDatasetGlove(GoogleDataset):
         self.glove_matrix = pd.read_table(glove_path, sep=" ", index_col=0, header=None, quoting=csv.QUOTE_NONE)
 
     def glove(self, word: str):
-        return self.glove_matrix.loc[word].as_matrix()
+        if not self.glove_contains_word(word):
+            return None
+        return self.glove_matrix.loc[word].values
+
+    def glove_contains_word(self, word: str):
+        return word in self.glove_matrix.index
 
     def glove_tokens(self, tokens: List[str]):
-        return np.array([self.glove(t) for t in tokens])
+        return np.array([self.glove(t) for t in tokens if self.glove_contains_word(t)])
 
     def embedding_size(self):
         return self.glove_matrix[1]
@@ -154,8 +160,8 @@ class GoogleDatasetGlove(GoogleDataset):
         claim: str = self.data[index][0]
         google_result: str = self.data[index][1]
 
-        claim_tokenized = claim.lower().split()
-        google_result_tokenized = claim.lower().split()
+        claim_tokenized = word_tokenize(claim.lower())
+        google_result_tokenized = word_tokenize(google_result.lower())
 
         claim_embedded = self.glove_tokens(claim_tokenized)
         google_result_embedded = self.glove_tokens(google_result_tokenized)
