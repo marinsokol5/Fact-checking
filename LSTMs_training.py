@@ -19,6 +19,8 @@ import numpy as np
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score, balanced_accuracy_score, confusion_matrix, classification_report
 import json
 import visdom
+from torch.optim import Adam
+import torch.nn as nn
 
 from models.LSTMs import LSTMs
 
@@ -82,24 +84,17 @@ def visdom_plot_line(visdom_vision, window, metric, epoch_index, scores_on_train
 # In[6]:
 
 
-def train(original_model, train_data, validation_data, train_batch_size, evaluation_batch_size, max_epochs=100, early_stop_epochs = 50, save_every_n = 10, model_name="model1",visdom_vision=None, visdom_plot_title=None):
+def train(original_model, train_data, validation_data, max_epochs=100, early_stop_epochs = 50, save_every_n = 10, model_name="model1",visdom_vision=None, visdom_plot_title=None):
     model = copy.deepcopy(original_model)
     model.to(device)
 
-    print(get_trainable_parameters(model))
-    param_optimizer = list(get_trainable_parameters(model, named=True))
-    no_decay = ['bias', 'LayerNorm.bias', 'LayerNorm.weight']
-    optimizer_grouped_parameters = [
-    {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], 'weight_decay': 0.01},
-    {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
-    ]
-    num_train_optimization_steps = int(len(train_data) / train_batch_size) * max_epochs
-    optimizer = BertAdam(optimizer_grouped_parameters, lr=learning_rate, warmup=warmup, t_total=num_train_optimization_steps)
+
+    num_train_optimization_steps = int(len(train_data) / batch_size) * max_epochs
+
+    dataloader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=4)
     
-    dataloader = DataLoader(train_data, batch_size=train_batch_size, shuffle=True, num_workers=4)
-    
-    scores_on_train_data = evaluate(model, train_data, evaluation_batch_size)
-    scores_on_validation_data = evaluate(model, validation_data, evaluation_batch_size)
+    scores_on_train_data = evaluate(model, train_data, batch_size)
+    scores_on_validation_data = evaluate(model, validation_data, batch_size)
     
     loss_plot = visdom_plot_line_initialize(visdom_vision, 'loss', visdom_plot_title, scores_on_train_data, scores_on_validation_data)
     accuracy_plot = visdom_plot_line_initialize(visdom_vision, 'accuracy', visdom_plot_title, scores_on_train_data, scores_on_validation_data)
@@ -121,16 +116,19 @@ def train(original_model, train_data, validation_data, train_batch_size, evaluat
         # for batch in tqdm(dataloader, desc="Iteration"):
         for batch in dataloader:
             batch = tuple(t.to(device) for t in batch)
-            input_ids, input_mask, segment_ids, label_ids = batch
+
+            print(batch)
             
             optimizer.zero_grad()
-                        
-            loss = model(input_ids, segment_ids, input_mask, label_ids)
+
+            logits = model(batch[0], batch[1])
+            loss = criterion(logits, batch[2])
+
             loss.backward()
             optimizer.step()
         
-        scores_on_train_data = evaluate(model, train_data, evaluation_batch_size)
-        scores_on_validation_data = evaluate(model, validation_data, evaluation_batch_size)
+        scores_on_train_data = evaluate(model, train_data, batch_size)
+        scores_on_validation_data = evaluate(model, validation_data, batch_size)
         
         visdom_plot_line(visdom_vision, loss_plot, 'loss', epoch_index, scores_on_train_data, scores_on_validation_data)
         visdom_plot_line(visdom_vision, accuracy_plot, 'accuracy', epoch_index, scores_on_train_data, scores_on_validation_data)
@@ -254,6 +252,9 @@ if __name__ == '__main__':
         num_layers=1,
         batch_size=batch_size
     )
+
+    optimizer = Adam(lstms_model.parameters(), lr=0.001)
+    criterion = nn.CrossEntropyLoss()
 
     max_epochs = 30
     early_stop_epochs = 10
