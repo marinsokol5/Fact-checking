@@ -186,7 +186,7 @@ class GoogleDatasetGlove(GoogleDataset):
         # each element in a batch is (claim, google_result, label) all embedded
         claims_batch = [b[0] for b in batch]
         google_result_batch = [b[1] for b in batch]
-        labels_batch = [b[2] for b in batch]
+        labels_batch = torch.Tensor([b[2] for b in batch])
 
         claims_padded = nn.utils.rnn.pad_sequence(claims_batch, batch_first=True)
         google_results_padded = nn.utils.rnn.pad_sequence(google_result_batch, batch_first=True)
