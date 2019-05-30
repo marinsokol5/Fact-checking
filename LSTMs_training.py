@@ -164,8 +164,8 @@ def evaluate(model, evaluation_data, result_file_name=None, find_best_threshold=
     dataloader = DataLoader(evaluation_data, batch_size=batch_size, shuffle=True, num_workers=4,
                             collate_fn=GoogleDatasetGlove.collate)
 
-    # for batch in tqdm(dataloader, desc="Evaluating"):
-    for batch in dataloader:
+    for batch in tqdm(dataloader, desc="Evaluating"):
+    # for batch in dataloader:
         batch = tuple(t.to(device) for t in batch)
         claim_batch, google_result_batch, label_batch = batch
 
