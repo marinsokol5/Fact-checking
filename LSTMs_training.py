@@ -90,8 +90,8 @@ def train(original_model, train_data, validation_data, max_epochs=100, early_sto
 
     dataloader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=4)
     
-    scores_on_train_data = evaluate(model, train_data, batch_size)
-    scores_on_validation_data = evaluate(model, validation_data, batch_size)
+    scores_on_train_data = evaluate(model, train_data)
+    scores_on_validation_data = evaluate(model, validation_data)
     
     loss_plot = visdom_plot_line_initialize(visdom_vision, 'loss', visdom_plot_title, scores_on_train_data, scores_on_validation_data)
     accuracy_plot = visdom_plot_line_initialize(visdom_vision, 'accuracy', visdom_plot_title, scores_on_train_data, scores_on_validation_data)
@@ -124,8 +124,8 @@ def train(original_model, train_data, validation_data, max_epochs=100, early_sto
             loss.backward()
             optimizer.step()
         
-        scores_on_train_data = evaluate(model, train_data, batch_size)
-        scores_on_validation_data = evaluate(model, validation_data, batch_size)
+        scores_on_train_data = evaluate(model, train_data)
+        scores_on_validation_data = evaluate(model, validation_data)
         
         visdom_plot_line(visdom_vision, loss_plot, 'loss', epoch_index, scores_on_train_data, scores_on_validation_data)
         visdom_plot_line(visdom_vision, accuracy_plot, 'accuracy', epoch_index, scores_on_train_data, scores_on_validation_data)
@@ -160,8 +160,10 @@ def train(original_model, train_data, validation_data, max_epochs=100, early_sto
     return best_model
 
 
-def evaluate(model, evaluation_data, batch_size, result_file_name=None, find_best_threshold=False):
+def evaluate(model, evaluation_data, result_file_name=None, find_best_threshold=False):
+    model.to(device)
     model.eval()
+
     dataloader = DataLoader(evaluation_data, batch_size=batch_size, shuffle=False, num_workers=4)
     
     actual_classes = np.array([], dtype=np.int)
@@ -263,7 +265,7 @@ if __name__ == '__main__':
 
     model_name = "lstms_1"
     lstms_trained = train(lstms_model, train_data, validation_data, max_epochs, early_stop_epochs, save_every_n, model_name, visdom_vision, visdom_plot_title=f"{model_name}")
-    evaluate(lstms_trained, test_data, batch_size, f"{model_name}_results")
+    evaluate(lstms_trained, test_data, f"{model_name}_results")
     save_model(lstms_model, f"{model_name}")
 
 
