@@ -4,3 +4,8 @@ data/
 saved_models/
 *.pyo
 *.pyc
+chromedriver
+models/*
+
+
+
