@@ -169,8 +169,8 @@ class GoogleDatasetGlove(GoogleDataset):
 
         label_id = GoogleDataset.LABEL_MAP[self.labels[index]]
 
-        return torch.from_numpy(claim_embedded), \
-               torch.from_numpy(google_result_embedded), \
+        return torch.from_numpy(claim_embedded).type(dtype=torch.float32), \
+               torch.from_numpy(google_result_embedded).type(dtype=torch.float32), \
                label_id
 
     def __len__(self):
@@ -191,7 +191,7 @@ class GoogleDatasetGlove(GoogleDataset):
         claims_padded = nn.utils.rnn.pad_sequence(claims_batch, batch_first=True)
         google_results_padded = nn.utils.rnn.pad_sequence(google_result_batch, batch_first=True)
 
-        return claims_padded, google_results_padded, labels_batch
+        return claims_padded.type(dtype=torch.float32), google_results_padded.type(dtype=torch.float32), labels_batch
 
 
 if __name__ == '__main__':

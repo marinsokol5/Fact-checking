@@ -21,10 +21,10 @@ class LSTMs(nn.Module):
         self.LSTM2 = nn.LSTM(input_size=emb_dim, hidden_size=hidden_dim, num_layers=num_layers, batch_first=True)
         self.fc = nn.Linear(2 * self.hidden_dim, 2)
 
-        self.hidden1 = torch.zeros(self.num_layers, self.batch_size, self.hidden_dim).to(device), \
-                       torch.zeros(self.num_layers, self.batch_size, self.hidden_dim).to(device)
-        self.hidden2 = torch.zeros(self.num_layers, self.batch_size, self.hidden_dim).to(device), \
-                       torch.zeros(self.num_layers, self.batch_size, self.hidden_dim).to(device)
+        self.hidden1 = torch.zeros(self.num_layers, self.batch_size, self.hidden_dim).to(device).type(dtype=torch.float32), \
+                       torch.zeros(self.num_layers, self.batch_size, self.hidden_dim).to(device).type(dtype=torch.float32)
+        self.hidden2 = torch.zeros(self.num_layers, self.batch_size, self.hidden_dim).to(device).type(dtype=torch.float32), \
+                       torch.zeros(self.num_layers, self.batch_size, self.hidden_dim).to(device).type(dtype=torch.float32)
 
     def forward(self, x):
         # lstm takes batch_size x sequence_lenght x embedding_size
