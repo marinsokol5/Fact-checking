@@ -9,6 +9,7 @@ import pandas as pd
 import csv
 import numpy as np
 from nltk import word_tokenize
+import torch.nn as nn
 
 # Imports from internal libraries
 
@@ -179,6 +180,18 @@ class GoogleDatasetGlove(GoogleDataset):
     def from_pickle(pickle_path: str, glove_path):
         google_result = pickle.load(open(pickle_path, "rb"))
         return GoogleDatasetGlove(google_result, glove_path)
+
+    @staticmethod
+    def collate(batch: List[tuple]):
+        # each element in a batch is (claim, google_result, label) all embedded
+        claims_batch = [b[0] for b in batch]
+        google_result_batch = [b[1] for b in batch]
+        labels_batch = [b[2] for b in batch]
+
+        claims_padded = nn.utils.rnn.pad_sequence(claims_batch, batch_first=True)
+        google_results_padded = nn.utils.rnn.pad_sequence(google_result_batch, batch_first=True)
+
+        return claims_padded, google_results_padded, labels_batch
 
 
 if __name__ == '__main__':

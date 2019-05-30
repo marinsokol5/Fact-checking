@@ -84,11 +84,6 @@ def visdom_plot_line(visdom_vision, window, metric, epoch_index, scores_on_train
 def train(original_model, train_data, validation_data, max_epochs=100, early_stop_epochs = 50, save_every_n = 10, model_name="model1",visdom_vision=None, visdom_plot_title=None):
     model = copy.deepcopy(original_model)
     model.to(device)
-
-
-    num_train_optimization_steps = int(len(train_data) / batch_size) * max_epochs
-
-    dataloader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=4)
     
     scores_on_train_data = evaluate(model, train_data)
     scores_on_validation_data = evaluate(model, validation_data)
@@ -113,15 +108,14 @@ def train(original_model, train_data, validation_data, max_epochs=100, early_sto
         # for batch in tqdm(dataloader, desc="Iteration"):
         for batch in dataloader:
             batch = tuple(t.to(device) for t in batch)
-
-            print(batch)
+            claim_batch, google_result_batch, label_batch = batch
             
             optimizer.zero_grad()
 
-            logits = model(batch[0], batch[1])
-            loss = criterion(logits, batch[2])
+            logits = model((claim_batch, google_result_batch))
+            batch_loss = criterion(logits, label_batch)
 
-            loss.backward()
+            batch_loss.backward()
             optimizer.step()
         
         scores_on_train_data = evaluate(model, train_data)
@@ -163,8 +157,6 @@ def train(original_model, train_data, validation_data, max_epochs=100, early_sto
 def evaluate(model, evaluation_data, result_file_name=None, find_best_threshold=False):
     model.to(device)
     model.eval()
-
-    dataloader = DataLoader(evaluation_data, batch_size=batch_size, shuffle=False, num_workers=4)
     
     actual_classes = np.array([], dtype=np.int)
     predicted_classes = np.array([], dtype=np.int)
@@ -173,19 +165,19 @@ def evaluate(model, evaluation_data, result_file_name=None, find_best_threshold=
     
     for batch in tqdm(dataloader, desc="Evaluating"):
         batch = tuple(t.to(device) for t in batch)
-        input_ids, input_mask, segment_ids, label_ids = batch
+        claim_batch, google_result_batch, label_batch = batch
 
         with torch.no_grad():
-            batch_loss = model(input_ids, segment_ids, input_mask, label_ids)
-            logits = model(input_ids, segment_ids, input_mask)
+            logits = model((claim_batch, google_result_batch))
+            batch_loss = criterion(logits, label_batch)
 
         logits = logits.detach().cpu()
         percentages = logits_to_percentages(logits).numpy()
         batch_predicted_classes = np.argmax(percentages, axis=1)
         batch_predicted_probabilities = percentages[:,1]
-        label_ids = label_ids.cpu().numpy()
+        label_batch = label_batch.cpu().numpy()
         
-        actual_classes = np.concatenate([actual_classes, label_ids], axis=0)
+        actual_classes = np.concatenate([actual_classes, label_batch], axis=0)
         predicted_classes = np.concatenate([predicted_classes, batch_predicted_classes], axis=0)
         predicted_probabilities = np.concatenate([predicted_probabilities, batch_predicted_probabilities], axis=0)
         
@@ -216,25 +208,6 @@ def evaluate(model, evaluation_data, result_file_name=None, find_best_threshold=
     return result
 
 
-# In[ ]:
-
-
-# def train_n_times(model, train_data, validation_data, n_times=10,score="auc", result_file_name=None):
-#     best_model = None
-#     best_score = None
-#     for _ in range(n_times):
-#         trained_model = train(model, train_data, validation_data, )
-#         accuracy = evaluate(trained_model)['accuracy']
-#
-#         if best_model is None or accuracy > best_score:
-#             best_model = trained_model
-#             best_accuracy = accuracy
-#     if result_file_name is not None:
-#         save_model(best_model, result_file_name)
-
-
-# In[ ]:
-
 if __name__ == '__main__':
     glove_file = GoogleDatasetGlove.GLOVE_6B_200
     train_data = GoogleDatasetGlove.from_pickle(GoogleDataset.TRAIN_DATA, glove_file)
@@ -251,7 +224,8 @@ if __name__ == '__main__':
         num_layers=1,
         batch_size=batch_size
     )
-
+    # num_train_optimization_steps = int(len(train_data) / batch_size) * max_epochs
+    dataloader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=4, collate_fn=GoogleDatasetGlove.collate)
     optimizer = Adam(lstms_model.parameters(), lr=0.001)
     criterion = nn.CrossEntropyLoss()
 
