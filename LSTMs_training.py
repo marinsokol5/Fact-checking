@@ -11,6 +11,7 @@ from sklearn.metrics import accuracy_score, f1_score, roc_auc_score, balanced_ac
 import json
 import visdom
 from torch.optim import Adam
+from torch.optim.lr_scheduler import StepLR
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -230,8 +231,10 @@ if __name__ == '__main__':
     )
     # num_train_optimization_steps = int(len(train_data) / batch_size) * max_epochs
 
-    optimizer = Adam(lstms_model.parameters(), lr=0.00005)
-    weights = torch.Tensor([0.2, 0.8]).to(device)
+    optimizer = Adam(lstms_model.parameters(), lr=0.001)
+    optimizer = StepLR(Adam, step_size=30, gamma=0.1)
+
+    weights = torch.Tensor([0.3, 0.7]).to(device)
     criterion = nn.CrossEntropyLoss(weight=weights)
 
     max_epochs = 100
