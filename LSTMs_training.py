@@ -230,8 +230,8 @@ if __name__ == '__main__':
     )
     # num_train_optimization_steps = int(len(train_data) / batch_size) * max_epochs
 
-    optimizer = Adam(lstms_model.parameters(), lr=0.00001)
-    weights = torch.Tensor([0.3, 0.7]).to(device)
+    optimizer = Adam(lstms_model.parameters(), lr=0.00005)
+    weights = torch.Tensor([0.2, 0.8]).to(device)
     criterion = nn.CrossEntropyLoss(weight=weights)
 
     max_epochs = 100
