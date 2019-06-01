@@ -7,12 +7,24 @@ import numpy as np
 # Imports from internal libraries
 
 
-def save_model(model, name):
+def save_bert_model(model, name):
     model_path = f"./saved_models/{name}.pt"
     config_path = f"./saved_models/{name}.config"
     torch.save(model.state_dict(), model_path)
     with open(config_path, 'w+') as f:
         f.write(model.config.to_json_string())
+
+
+def save_model(model, name):
+    model_path = f"./saved_models/{name}.pt"
+    torch.save(model, model_path)    
+
+
+def load_model(name):
+    model_path = f"./saved_models/{name}.pt"
+    model = torch.load(model_path)
+    model.eval()
+    return model
 
 
 def load_bert_model(name, num_labels=2, freeze=True):
@@ -25,6 +37,8 @@ def load_bert_model(name, num_labels=2, freeze=True):
     if freeze:
         freeze_only_first_n_layers(model, 2)
     return model
+
+
 
 
 def interpret_bert_output(logits):

@@ -102,7 +102,7 @@ def train(original_model, train_data, validation_data, max_epochs=100, early_sto
         model.train()
 
         dataloader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=4,
-                                collate_fn=GoogleDatasetGlove.collate)
+                                collate_fn=GoogleDatasetGlove.collate, drop_last=True)
         # for batch in tqdm(dataloader, desc="Iteration"):
         for batch in dataloader:
             batch = tuple(t.to(device) for t in batch)
@@ -162,7 +162,7 @@ def evaluate(model, evaluation_data, result_file_name=None, find_best_threshold=
     loss_sum, loss_size = 0, 0
 
     dataloader = DataLoader(evaluation_data, batch_size=batch_size, shuffle=True, num_workers=4,
-                            collate_fn=GoogleDatasetGlove.collate)
+                            collate_fn=GoogleDatasetGlove.collate, drop_last=True)
 
     for batch in tqdm(dataloader, desc="Evaluating"):
     # for batch in dataloader:
@@ -210,18 +210,19 @@ def evaluate(model, evaluation_data, result_file_name=None, find_best_threshold=
 
 
 if __name__ == '__main__':
-    glove_file = GoogleDatasetGlove.GLOVE_6B_200
-    train_data = GoogleDatasetGlove.from_pickle(GoogleDataset.TRAIN_DATA, glove_file)
-    validation_data = GoogleDatasetGlove.from_pickle(GoogleDataset.VALIDATION_DATA, glove_file)
-    test_data = GoogleDatasetGlove.from_pickle(GoogleDataset.TEST_DATA, glove_file)
+    # glove_file = GoogleDatasetGlove.GLOVE_6B_200
+    train_data = GoogleDatasetGlovePickle(GoogleDatasetGlovePickle.GLOVE_PICKLED_TRAIN)
+    validation_data = GoogleDatasetGlovePickle(GoogleDatasetGlovePickle.GLOVE_PICKLED_VALIDATION)
+    test_data = GoogleDatasetGlovePickle(GoogleDatasetGlovePickle.GLOVE_PICKLED_TEST)
 
+    embedding_size = train_data[0][0].size()[1]
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     visdom_vision = visdom.Visdom()
 
     batch_size = 16
     lstms_model = LSTMs(
-        emb_dim=train_data.embedding_size(),
+        emb_dim=embedding_size,
         hidden_dim=250,
         num_layers=1,
         batch_size=batch_size,

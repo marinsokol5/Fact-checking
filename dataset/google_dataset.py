@@ -10,6 +10,8 @@ import csv
 import numpy as np
 from nltk import word_tokenize
 import torch.nn as nn
+from util.general_util import pickle_load
+
 
 # Imports from internal libraries
 
@@ -188,10 +190,28 @@ class GoogleDatasetGlove(GoogleDataset):
         google_result_batch = [b[1] for b in batch]
         labels_batch = torch.LongTensor([b[2] for b in batch])
 
-        claims_padded = nn.utils.rnn.pad_sequence(claims_batch, batch_first=True)
-        google_results_padded = nn.utils.rnn.pad_sequence(google_result_batch, batch_first=True)
+        claims_padded = nn.utils.rnn.pad_sequence(claims_batch, batch_first=True).type(dtype=torch.float32)
+        google_results_padded = nn.utils.rnn.pad_sequence(google_result_batch, batch_first=True).type(dtype=torch.float32)
 
-        return claims_padded.type(dtype=torch.float32), google_results_padded.type(dtype=torch.float32), labels_batch
+        # i can't use this as this sorts the given input
+        # claims_padded_packed = nn.utils.rnn.pack_padded_sequence()
+
+        return claims_padded, google_results_padded, labels_batch
+
+
+class GoogleDatasetGlovePickle:
+    GLOVE_PICKLED_TRAIN = "data/glove_pickled_train.pkl"
+    GLOVE_PICKLED_VALIDATION = "data/glove_pickled_validation.pkl"
+    GLOVE_PICKLED_TEST = "data/glove_pickled_test.pkl"
+
+    def __init__(self, glove_pickled_path: str):
+        self.glove_pickled = pickle_load(glove_pickled_path)
+
+    def __getitem__(self, index):
+        return self.glove_pickled[index]
+
+    def __len__(self):
+        return len(self.glove_pickled)
 
 
 if __name__ == '__main__':

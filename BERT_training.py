@@ -14,7 +14,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm, trange
 from pytorch_pretrained_bert.modeling import BertConfig
 import copy
-from util.modelling_util import save_model, load_bert_model, logits_to_percentages, freeze_only_first_n_layers, get_trainable_parameters, get_best_possible_threshold
+from util.modelling_util import save_bert_model, load_bert_model, logits_to_percentages, freeze_only_first_n_layers, get_trainable_parameters, get_best_possible_threshold
 import numpy as np
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score, balanced_accuracy_score, confusion_matrix, classification_report
 import json
@@ -159,7 +159,7 @@ def train(original_model, train_data, validation_data, train_batch_size, evaluat
         save_iter += 1
         if save_iter % save_every_n == 0:
             save_iter = 0
-            save_model(model, model_name)
+            save_bert_model(model, model_name)
 
     return best_model
 
@@ -221,18 +221,6 @@ def evaluate(model, evaluation_data, batch_size, result_file_name=None, find_bes
 # In[ ]:
 
 
-# def train_n_times(model, train_data, validation_data, n_times=10,score="auc", result_file_name=None):
-#     best_model = None
-#     best_score = None
-#     for _ in range(n_times):
-#         trained_model = train(model, train_data, validation_data, )
-#         accuracy = evaluate(trained_model)['accuracy']
-#
-#         if best_model is None or accuracy > best_score:
-#             best_model = trained_model
-#             best_accuracy = accuracy
-#     if result_file_name is not None:
-#         save_model(best_model, result_file_name)
 
 
 # In[ ]:
@@ -260,6 +248,6 @@ if __name__ == '__main__':
     model_name = "bert1"
     bert = train(bert_model, train_data, validation_data, train_batch_size, evaluation_batch_size, max_epochs, early_stop_epochs, save_every_n, model_name, visdom_vision, visdom_plot_title=f"{model_name}")
     evaluate(bert, test_data, evaluation_batch_size, f"{model_name}_results")
-    save_model(bert, f"{model_name}")
+    save_bert_model(bert, f"{model_name}")
 
 
