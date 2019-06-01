@@ -230,14 +230,12 @@ if __name__ == '__main__':
     )
     # num_train_optimization_steps = int(len(train_data) / batch_size) * max_epochs
 
-    optimizer = Adam(lstms_model.parameters(), lr=0.001)
+    optimizer = Adam(lstms_model.parameters(), lr=0.0003)
     criterion = nn.CrossEntropyLoss()
 
-    max_epochs = 30
-    early_stop_epochs = 10
-    save_every_n = 4
-
-    learning_rate = 5e-5
+    max_epochs = 100
+    early_stop_epochs = 30
+    save_every_n = 10
 
     model_name = "lstms_1"
     lstms_trained = train(lstms_model, train_data, validation_data, max_epochs, early_stop_epochs, save_every_n, model_name, visdom_vision, visdom_plot_title=f"{model_name}")
