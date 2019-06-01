@@ -87,8 +87,8 @@ def train(original_model, train_data, validation_data, max_epochs=100, early_sto
     accuracy_plot = visdom_plot_line_initialize(visdom_vision, 'accuracy', visdom_plot_title, scores_on_train_data, scores_on_validation_data)
     auc_plot = visdom_plot_line_initialize(visdom_vision, 'auc', visdom_plot_title, scores_on_train_data, scores_on_validation_data)
     balanced_accuracy_plot = visdom_plot_line_initialize(visdom_vision, 'balanced_accuracy', visdom_plot_title, scores_on_train_data, scores_on_validation_data)
-    sensitivity_plot = visdom_plot_line_initialize(visdom_vision, 'sensitivity', visdom_plot_title, scores_on_train_data, scores_on_validation_data)
-    specificity_plot = visdom_plot_line_initialize(visdom_vision, 'specificity', visdom_plot_title, scores_on_train_data, scores_on_validation_data)
+    sensitivity_plot = visdom_plot_line_initialize(visdom_vision, 'recall-1', visdom_plot_title, scores_on_train_data, scores_on_validation_data)
+    specificity_plot = visdom_plot_line_initialize(visdom_vision, 'recall-0', visdom_plot_title, scores_on_train_data, scores_on_validation_data)
 
     best_model = copy.deepcopy(model)
     best_balanced_accuracy = scores_on_validation_data['balanced_accuracy']
@@ -123,8 +123,8 @@ def train(original_model, train_data, validation_data, max_epochs=100, early_sto
         visdom_plot_line(visdom_vision, accuracy_plot, 'accuracy', epoch_index, scores_on_train_data, scores_on_validation_data)
         visdom_plot_line(visdom_vision, auc_plot, 'auc', epoch_index, scores_on_train_data, scores_on_validation_data)
         visdom_plot_line(visdom_vision, balanced_accuracy_plot, 'balanced_accuracy', epoch_index, scores_on_train_data, scores_on_validation_data)
-        visdom_plot_line(visdom_vision, sensitivity_plot, 'sensitivity', epoch_index, scores_on_train_data, scores_on_validation_data)
-        visdom_plot_line(visdom_vision, specificity_plot, 'specificity', epoch_index, scores_on_train_data, scores_on_validation_data)
+        visdom_plot_line(visdom_vision, sensitivity_plot, 'recall-1', epoch_index, scores_on_train_data, scores_on_validation_data)
+        visdom_plot_line(visdom_vision, specificity_plot, 'recall-0', epoch_index, scores_on_train_data, scores_on_validation_data)
 
         current_balanced_accuracy = scores_on_validation_data['balanced_accuracy']
         current_accuracy = scores_on_validation_data['accuracy']
@@ -194,8 +194,8 @@ def evaluate(model, evaluation_data, result_file_name=None, find_best_threshold=
         'loss': loss_sum/loss_size,
         'accuracy': accuracy_score(actual_classes, predicted_classes),
         'balanced_accuracy': balanced_accuracy_score(actual_classes, predicted_classes),
-        'sensitivity': report['1']['recall'],
-        'specificity': report['0']['recall'],
+        'recall-1': report['1']['recall'],
+        'recall-0': report['0']['recall'],
         'f1-score': f1_score(actual_classes, predicted_classes),
         'auc': roc_auc_score(actual_classes, predicted_probabilities),
         'confusion_matrix': confusion_matrix(actual_classes, predicted_classes).tolist()
