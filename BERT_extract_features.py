@@ -34,7 +34,7 @@ if __name__ == '__main__':
         pickle_path = GoogleDatasetBertPickle.BERT_PICKLED_TEST
     print(f"Pickling into {pickle_path}.")
 
-    batch_size = 32
+    batch_size = 8
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     bert_model = BertModel.from_pretrained("bert-base-uncased")
