@@ -9,7 +9,7 @@
 from dataset.google_dataset import *
 import torch
 from pytorch_pretrained_bert import BertTokenizer, BertModel, BertForMaskedLM, BertForSequenceClassification
-from pytorch_pretrained_bert.optimization import BertAdam, warmup_linear
+from pytorch_pretrained_bert.optimization import BertAdam
 from torch.utils.data import DataLoader
 from tqdm import tqdm, trange
 from pytorch_pretrained_bert.modeling import BertConfig
