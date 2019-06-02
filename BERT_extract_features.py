@@ -55,7 +55,9 @@ if __name__ == '__main__':
             attention_mask=input_mask,
             output_all_encoded_layers=True
         )
-        print(all_encoded_layers.size())
+        for i, l in enumerate(all_encoded_layers):
+            print(f"Layer {i}: {l.size()}")
+        # print(all_encoded_layers.size())
         print(polled_output.size())
         print(label_ids.size())
         raise Exception()
