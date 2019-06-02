@@ -214,6 +214,21 @@ class GoogleDatasetGlovePickle:
         return len(self.glove_pickled)
 
 
+class GoogleDatasetBertPickle:
+    BERT_PICKLED_TRAIN = "data/bert_pickled_train.pkl"
+    BERT_PICKLED_VALIDATION = "data/bert_pickled_validation.pkl"
+    BERT_PICKLED_TEST = "data/bert_pickled_test.pkl"
+
+    def __init__(self, bert_pickled_path: str):
+        self.bert_pickled = pickle_load(bert_pickled_path)
+
+    def __getitem__(self, index):
+        return self.bert_pickled[index]
+
+    def __len__(self):
+        return len(self.bert_pickled)
+
+
 if __name__ == '__main__':
     import os
     os.chdir("..")
