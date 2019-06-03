@@ -235,8 +235,8 @@ if __name__ == '__main__':
     scheduler = StepLR(optimizer, step_size=30, gamma=0.1)
 
     weights = torch.Tensor([0.3, 0.7]).to(device)
-    # criterion = nn.CrossEntropyLoss(weight=weights)
-    criterion = nn.BCEWithLogitsLoss(weight=weights)
+    criterion = nn.CrossEntropyLoss(weight=weights)
+    # criterion = nn.BCEWithLogitsLoss(weight=weights)
 
     max_epochs = 100
     early_stop_epochs = 30
