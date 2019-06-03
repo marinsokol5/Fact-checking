@@ -233,9 +233,10 @@ class GoogleDatasetBertPickle:
         labels = []
         for features, label in self:
             features_matrix.append(features)
-            labels.append(label)
+            labels.append(GoogleDataset.LABEL_MAP[label])
 
         return np.array(features_matrix), np.array(labels)
+
 
 if __name__ == '__main__':
     import os
