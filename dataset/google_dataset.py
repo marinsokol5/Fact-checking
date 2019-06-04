@@ -190,13 +190,18 @@ class GoogleDatasetGlove(GoogleDataset):
         google_result_batch = [b[1] for b in batch]
         labels_batch = torch.LongTensor([b[2] for b in batch])
 
+        claims_lenghts = [len(claim) for claim in claims_batch]
         claims_padded = nn.utils.rnn.pad_sequence(claims_batch, batch_first=True).type(dtype=torch.float32)
+        google_results_lenghts = [len(google_result) for google_result in google_result_batch]
         google_results_padded = nn.utils.rnn.pad_sequence(google_result_batch, batch_first=True).type(dtype=torch.float32)
 
         # i can't use this as this sorts the given input
-        # claims_padded_packed = nn.utils.rnn.pack_padded_sequence()
+        claims_padded_packed = nn.utils.rnn.pack_padded_sequence(input=claims_padded, lengths=claims_lenghts, batch_first=True, enforce_sorted=False)
+        google_results_padded_packed = nn.utils.rnn.pack_padded_sequence(input=google_results_padded, lengths=google_results_lenghts,
+                                                                 batch_first=True, enforce_sorted=False)
 
-        return claims_padded, google_results_padded, labels_batch
+        return claims_padded_packed, google_results_padded_packed, labels_batch
+        # return claims_padded, google_results_padded, labels_batch
 
 
 class GoogleDatasetGlovePickle:
