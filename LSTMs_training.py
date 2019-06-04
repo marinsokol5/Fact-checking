@@ -212,7 +212,7 @@ def evaluate(model, evaluation_data, result_file_name=None, find_best_threshold=
 
 if __name__ == '__main__':
     # glove_file = GoogleDatasetGlove.GLOVE_6B_200
-    train_data = GoogleDatasetGlovePickle(GoogleDatasetGlovePickle.GLOVE_PICKLED_VALIDATION)
+    train_data = GoogleDatasetGlovePickle(GoogleDatasetGlovePickle.GLOVE_PICKLED_TRAIN)
     validation_data = GoogleDatasetGlovePickle(GoogleDatasetGlovePickle.GLOVE_PICKLED_VALIDATION)
     test_data = GoogleDatasetGlovePickle(GoogleDatasetGlovePickle.GLOVE_PICKLED_TEST)
 
