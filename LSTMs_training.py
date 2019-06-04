@@ -234,7 +234,7 @@ if __name__ == '__main__':
     optimizer = Adam(lstms_model.parameters(), lr=0.0001)
     scheduler = StepLR(optimizer, step_size=10, gamma=0.1)
 
-    weights = torch.Tensor([0.4, 0.6]).to(device)
+    weights = torch.Tensor([0.45, 0.55]).to(device)
     criterion = nn.CrossEntropyLoss(weight=weights)
     # criterion = nn.BCEWithLogitsLoss(weight=weights)
 
