@@ -34,10 +34,11 @@ class LSTMs(nn.Module):
         # lstm outputs batch_size x sequence_lenght x embedding_size
         # out1, self.hidden1 = self.LSTM1(x[0], self.hidden1)
         # out2, self.hidden2 = self.LSTM2(x[1], self.hidden2
-        print(x[0])
-        print(x[0].to(self.device))
-        print(x[0].cuda())
+        # print(x[0])
+        # print(x[0].to(self.device))
+        # print(x[0].cuda())
         # x[0][1] = x[0][1].to(self.device)
+
         out1, hidden1 = self.LSTM1(x[0])
         out2, hidden2 = self.LSTM2(x[1])
 

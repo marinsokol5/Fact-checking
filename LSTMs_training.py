@@ -167,7 +167,7 @@ def evaluate(model, evaluation_data, result_file_name=None, find_best_threshold=
 
     for batch in tqdm(dataloader, desc="Evaluating"):
     # for batch in dataloader:
-        batch = tuple(t.to(device) for t in batch)
+        batch = tuple(t.to(device=device) for t in batch)
         claim_batch, google_result_batch, label_batch = batch
 
         with torch.no_grad():
