@@ -45,8 +45,11 @@ class LSTMs(nn.Module):
         claim_sorted_indices = x[0].sorted_indices
         google_result_sorted_indices = x[1].sorted_indices
 
-        claim_hidden = hidden1[1][claim_sorted_indices]
-        google_result = hidden2[1][google_result_sorted_indices]
+        # claim_hidden = hidden1[1][claim_sorted_indices]
+        # google_result = hidden2[1][google_result_sorted_indices]
+
+        claim_hidden = hidden1[1]
+        google_result = hidden2[1]
 
         cell_merged = torch.cat((claim_hidden, google_result), dim=2)
         output = self.fc(cell_merged)
