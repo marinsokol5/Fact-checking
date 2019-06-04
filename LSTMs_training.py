@@ -231,14 +231,14 @@ if __name__ == '__main__':
     )
     # num_train_optimization_steps = int(len(train_data) / batch_size) * max_epochs
 
-    optimizer = Adam(lstms_model.parameters(), lr=0.001)
-    scheduler = StepLR(optimizer, step_size=10, gamma=0.1)
+    optimizer = Adam(lstms_model.parameters(), lr=0.01)
+    scheduler = StepLR(optimizer, step_size=30, gamma=0.1)
 
-    weights = torch.Tensor([0.45, 0.55]).to(device)
+    weights = torch.Tensor([0.4, 0.6]).to(device)
     criterion = nn.CrossEntropyLoss(weight=weights)
     # criterion = nn.BCEWithLogitsLoss(weight=weights)
 
-    max_epochs = 30
+    max_epochs = 100
     early_stop_epochs = 30
     save_every_n = 10
 
