@@ -106,7 +106,7 @@ def train(original_model, train_data, validation_data, max_epochs=100, early_sto
                                 collate_fn=GoogleDatasetGlove.collate, drop_last=True)
         # for batch in tqdm(dataloader, desc="Iteration"):
         for batch in dataloader:
-            batch = tuple(t.to(device) for t in batch)
+            batch = tuple(t.to(device=device) for t in batch)
             claim_batch, google_result_batch, label_batch = batch
             
             optimizer.zero_grad()
@@ -212,7 +212,7 @@ def evaluate(model, evaluation_data, result_file_name=None, find_best_threshold=
 
 if __name__ == '__main__':
     # glove_file = GoogleDatasetGlove.GLOVE_6B_200
-    train_data = GoogleDatasetGlovePickle(GoogleDatasetGlovePickle.GLOVE_PICKLED_TRAIN)
+    train_data = GoogleDatasetGlovePickle(GoogleDatasetGlovePickle.GLOVE_PICKLED_VALIDATION)
     validation_data = GoogleDatasetGlovePickle(GoogleDatasetGlovePickle.GLOVE_PICKLED_VALIDATION)
     test_data = GoogleDatasetGlovePickle(GoogleDatasetGlovePickle.GLOVE_PICKLED_TEST)
 
