@@ -221,7 +221,7 @@ if __name__ == '__main__':
 
     visdom_vision = visdom.Visdom()
 
-    batch_size = 16
+    batch_size = 8
     lstms_model = LSTMs(
         emb_dim=embedding_size,
         hidden_dim=250,
