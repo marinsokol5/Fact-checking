@@ -104,8 +104,8 @@ def train(original_model, train_data, validation_data, max_epochs=100, early_sto
 
         dataloader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=4,
                                 collate_fn=GoogleDatasetGlove.collate, drop_last=True)
-        # for batch in tqdm(dataloader, desc="Iteration"):
-        for batch in dataloader:
+        for batch in tqdm(dataloader, desc="Iteration"):
+        # for batch in dataloader:
             batch = tuple(t.to(device=device) for t in batch)
             claim_batch, google_result_batch, label_batch = batch
             
