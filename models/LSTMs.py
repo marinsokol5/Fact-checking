@@ -25,8 +25,8 @@ class LSTMs(nn.Module):
         # self.hidden1 = self._init_hidden(), self._init_hidden()
         # self.hidden2 = self._init_hidden(), self._init_hidden()
 
-        self.hidden1 = None
-        self.hidden2 = None
+        # self.hidden1 = None
+        # self.hidden2 = None
     
     def _init_hidden(self):
         return torch.zeros(self.num_layers, self.batch_size, self.hidden_dim).to(self.device).type(dtype=torch.float32).detach()
@@ -42,23 +42,20 @@ class LSTMs(nn.Module):
         # print(x[0].cuda())
         # x[0][1] = x[0][1].to(self.device)
 
-        out1, hidden1 = self.LSTM1(x[0], self.hidden1)
-        out2, hidden2 = self.LSTM2(x[1], self.hidden2)
+        out1, hidden1 = self.LSTM1(x[0])
+        out2, hidden2 = self.LSTM2(x[1])
 
         claim_sorted_indices = x[0].sorted_indices
         google_result_sorted_indices = x[1].sorted_indices
 
-        claim_hidden_state = hidden1[1].squeeze().clone().detach()[claim_sorted_indices]
-        google_result_hidden_state = hidden2[1].squeeze().clone().detach()[google_result_sorted_indices]
+        claim_hidden_state = hidden1[1].squeeze()[claim_sorted_indices]
+        google_result_hidden_state = hidden2[1].squeeze()[google_result_sorted_indices]
 
         # claim_hidden = hidden1[1]
         # google_result = hidden2[1]
 
         cell_merged = torch.cat((claim_hidden_state, google_result_hidden_state), dim=1)
         output = self.fc(cell_merged)
-
-        self.hidden1 = hidden1
-        self.hidden2 = hidden2
 
         return output
 
